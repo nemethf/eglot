@@ -49,7 +49,7 @@ The client can send files to the server only from the result of
 by `eglot-x-files-visible-regexp' and
 `eglot-x-files-hidden-regexp'.  This feature works if
 `project-roots' and `project-external-roots' are set correctly.
-(project-files was introduced in Emacs-27; eglot-x backports the
+\(project-files was introduced in Emacs-27; eglot-x backports the
 implementation to Emacs-26.)"
   :type 'boolean
   :link `(url-link
@@ -149,8 +149,7 @@ assumed to be an element of `project-files'."
   "Handle server request textDocument/xcontent"
   (let* ((file (eglot--uri-to-path (plist-get textDocument :uri)))
          (buffer (find-buffer-visiting file))
-         (project-files (eglot-x--project-files (eglot--project server)))
-         doc-item)
+         (project-files (eglot-x--project-files (eglot--project server))))
     (if (or (not (eglot-x--files-visible-p file))
             (not (seq-contains project-files file #'string-equal)))
 	(progn
@@ -161,11 +160,10 @@ assumed to be an element of `project-files'."
           (with-current-buffer buffer
             (eglot--TextDocumentItem))
         (condition-case err
-            (save-excursion
-              (find-file-literally file)
-              (setq doc-item (eglot--TextDocumentItem))
-              (kill-buffer)
-              doc-item)
+            (with-temp-buffer
+              (let ((buffer-file-name file))
+                (insert-file-literally file)
+                (eglot--TextDocumentItem)))
           (file-error
            (let ((msg (error-message-string err)))
              (eglot--warn "Server-request failed for %s: %s" file msg)
