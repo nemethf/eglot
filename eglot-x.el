@@ -44,13 +44,19 @@
 
 (defcustom eglot-x-enable-files t
   "If non-nil, enable the support for the files protocol extension.
+
+The extension allows the client and the server to have separate
+file systems.  For example, the server can run inside a Docker
+container, or the source code can be on a remote system accessed
+by Tramp.  (With emacs-26, the latter is not supported.)
+
 The client can send files to the server only from the result of
 `project-files'.  The list of eligible files can further limited
 by `eglot-x-files-visible-regexp' and
 `eglot-x-files-hidden-regexp'.  This feature works if
 `project-roots' and `project-external-roots' are set correctly.
-\(project-files was introduced in Emacs-27; eglot-x backports the
-implementation to Emacs-26.)"
+\(project-files was introduced in emacs-27; eglot-x backports the
+implementation to emacs-26.)"
   :type 'boolean
   :link `(url-link
           :tag "the documentation of the extesion proposal"
@@ -109,7 +115,7 @@ subset of the project roots and external roots."
       ;; Cache is expired
       (setq files (if (fboundp 'project-files)
                       (project-files project dirs)
-                    ;; Copied from Emacs-27
+                    ;; Copied from an old version of emacs-27
                     (all-completions
                      "" (project-file-completion-table
                          project (or dirs (project-roots project)))))))
